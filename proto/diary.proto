@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+service DiaryService {
+  rpc GetDiary (DiaryId) returns (Diary) {};
+  rpc ListDiaries (UserId) returns (stream Diary) {};
+  rpc RecordDiary (stream DiaryId) returns (RecordSummary) {};
+  rpc DiaryChat (stream DiaryNote) returns (stream DiaryNote) {};
+}
+
+message Diary {
+  string title = 1;
+  string content = 2;
+}
+
+message DiaryId {
+  string id = 1;
+}
+
+message UserId {
+  string id = 1;
+}
+
+message RecordSummary {
+  int32 num_characters = 1;
+  int32 timestamp = 2;
+}
+
+message DiaryNote {
+  string id = 1;
+  string message = 2;
+}
