@@ -1,7 +1,7 @@
 use grpc_server::route_guide_rpc::route_guide;
 use route_guide::{
     route_guide_client::RouteGuideClient,
-    Point, Rectangle, RouteNote
+    Point,
 };
 use tonic::Request;
 
