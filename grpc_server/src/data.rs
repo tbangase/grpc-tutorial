@@ -16,7 +16,7 @@ struct Location {
 
 #[allow(dead_code)]
 pub fn load() -> Vec<route_guide::Feature> {
-    let file = File::open("data/route_guide_db.json").expect("failed to open data file");
+    let file = File::open("grpc_server/data/route_guide_db.json").expect("failed to open data file");
 
     let decoded: Vec<Feature> =
         serde_json::from_reader(&file).expect("failed to deserialize features");
