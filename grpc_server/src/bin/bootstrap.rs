@@ -1,6 +1,6 @@
 use anyhow::Result;
 use tonic::transport::Server;
-use grpc_tutorial::{
+use grpc_server::{
     data,
     route_guide_rpc::RouteGuideService,
     route_guide_rpc::route_guide::route_guide_server::RouteGuideServer
