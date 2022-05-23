@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package diary;
+
 service DiaryService {
   rpc GetDiary (DiaryId) returns (Diary) {};
   rpc ListDiaries (UserId) returns (stream Diary) {};

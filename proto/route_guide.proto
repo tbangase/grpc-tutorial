@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package route_guide;
+
 service RouteGuide {
   rpc GetFeature(Point) returns (Feature) {};
   rpc ListFeatures(Rectangle) returns (stream Feature) {};
@@ -28,8 +30,8 @@ message RouteNote {
 }
 
 message RouteSummary {
-  int32 point_count = 2;
-  int32 feature_count = 3;
-  int32 distance = 4;
-  int32 elapsed_time = 5;
+  int32 point_count = 1;
+  int32 feature_count = 2;
+  int32 distance = 3;
+  int32 elapsed_time = 4;
 }

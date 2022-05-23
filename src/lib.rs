@@ -1,3 +1,6 @@
+pub mod data;
+pub mod route_guide_rpc;
+
 #[cfg(test)]
 mod tests {
     #[test]

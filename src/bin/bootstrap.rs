@@ -1,4 +1,22 @@
+use anyhow::Result;
+use tonic::transport::Server;
+use grpc_tutorial::{
+    data,
+    route_guide_rpc::RouteGuideService,
+    route_guide_rpc::route_guide::route_guide_server::RouteGuideServer
+};
+use std::sync::Arc;
 
-fn main() {
-    println!("Hello, world!");
+#[tokio::main]
+async fn main() -> Result<()> {
+    let addr = "[::1]:10000".parse().unwrap();
+
+    let route_guide = RouteGuideService::new(
+        Arc::new(data::load())
+    );
+
+    let svc = RouteGuideServer::new(route_guide);
+
+    Server::builder().add_service(svc).serve(addr).await?;
+    Ok(())
 }
