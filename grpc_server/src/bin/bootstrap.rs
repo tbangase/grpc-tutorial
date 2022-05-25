@@ -9,6 +9,9 @@ use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    std::env::set_var("RUST_LOG", "info");
+    tracing_subscriber::fmt::init();
+
     let addr = "[::1]:10000".parse().unwrap();
 
     let route_guide = RouteGuideService::new(
