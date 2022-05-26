@@ -14,6 +14,8 @@ use std::hash::{Hash, Hasher};
 use tokio::sync::mpsc;
 use tonic::{Request, Response, Status, Streaming};
 use tokio_stream::wrappers::ReceiverStream;
+use futures_util::StreamExt;
+
 
 use getset::{Getters, Setters};
 use derive_new::new;
@@ -107,21 +109,49 @@ impl RouteGuide for RouteGuideService {
 
         tokio::spawn(async move {
             for feature in features.iter() {
+                // 1つずつFeatureを送信する
                 if in_range(feature.location.as_ref().unwrap(), request.get_ref()) {
                     tx.send(Ok(feature.clone())).await.unwrap();
                 }
             }
         });
 
+        // データを受信するためのReceiverStreamを返す
         Ok(Response::new(ReceiverStream::new(rx)))
     }
 
 
     async fn record_route(
         &self,
-        _request: Request<Streaming<Point>>
+        request: Request<Streaming<Point>>
     ) -> Result<Response<RouteSummary>, Status> {
-        unimplemented!()
+
+        let mut stream = request.into_inner();
+
+        let mut summary = RouteSummary::default();
+        let mut last_point = None;
+        let now = std::time::Instant::now();
+
+        while let Some(point) = stream.next().await {
+            tracing::info!("\nRecording point: {:?}", point);
+            let point = point?;
+            summary.point_count += 1;
+
+            for feature in self.features().iter() {
+                if feature.location.as_ref() == Some(&point) {
+                    summary.feature_count += 1;
+                }
+            }
+
+            if let Some(ref last_point) = last_point {
+                summary.distance += calc_distance(last_point, &point);
+            }
+
+            last_point = Some(point);
+        }
+
+        summary.elapsed_time = now.elapsed().as_secs() as i32;
+        Ok(Response::new(summary))
     }
 
 
