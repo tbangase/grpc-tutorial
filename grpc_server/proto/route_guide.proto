@@ -2,23 +2,34 @@ syntax = "proto3";
 
 package route_guide;
 
+// RouteGuide service
 service RouteGuide {
+  // Unary call to get Feature at given point.
   rpc GetFeature(Point) returns (Feature) {};
+
+  // Server streaming call to list Features available within the given
   rpc ListFeatures(Rectangle) returns (stream Feature) {};
+
+  // Client streaming call to recording Route with several points.
   rpc RecordRoute(stream Point) returns (RouteSummary) {};
+
+  // Bidirectional streaming call to Chatting 
   rpc RouteChat(stream RouteNote) returns (stream RouteNote) {};
 }
 
+// Point represents latitude and longitude point of map.
 message Point {
   int32 latitude = 1;
   int32 longitude = 2;
 }
 
+// Feature represents a feature, like a landmark or building, on the map.
 message Feature {
   string name = 1;
   Point location = 2;
 }
 
+// Rectangle defines a rectangle range in the map.
 message Rectangle {
   Point lo = 1;
   Point hi = 2;

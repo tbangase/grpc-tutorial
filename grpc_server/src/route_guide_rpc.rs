@@ -6,6 +6,7 @@ use route_guide::route_guide_server::RouteGuide;
 use route_guide::{Feature, Point, Rectangle, RouteNote, RouteSummary};
 
 use futures_core::Stream;
+use std::collections::HashMap;
 use std::{
     pin::Pin,
     sync::Arc,
@@ -15,7 +16,6 @@ use tokio::sync::mpsc;
 use tonic::{Request, Response, Status, Streaming};
 use tokio_stream::wrappers::ReceiverStream;
 use futures_util::StreamExt;
-
 
 use getset::{Getters, Setters};
 use derive_new::new;
@@ -156,14 +156,35 @@ impl RouteGuide for RouteGuideService {
 
 
     // Moveした時にChatStreamのアドレスが変わらないようにPinを使う
-    // なんで??
+    // なんで?? 双方向だから??
+    // 複数の接続があっても、状態を共有するため??
     type RouteChatStream = Pin<Box<dyn Stream<Item = Result<RouteNote, Status>> + Send + 'static >>;
 
     async fn route_chat(
         &self,
-        _request: Request<Streaming<RouteNote>>
+        request: Request<Streaming<RouteNote>>
     ) ->  Result<Response<Self::RouteChatStream> ,Status> {
-        unimplemented!()
+        // Key: Point, Value: Vec<RouteNote>
+        let mut notes = HashMap::new();
+        let mut client_stream = request.into_inner();
+
+        let server_stream = 
+        async_stream::try_stream! {
+            // client_streamにデータがが流し込まれたらserver_streamで取り出す
+            while let Some(note) = client_stream.next().await {
+                let note = note?;
+
+                let location = note.location.clone();
+
+                let location_notes = notes.entry(location).or_insert(vec![]);
+                location_notes.push(note);
+
+                for note in location_notes {
+                    yield note.clone();
+                }
+            }
+        };
+        Ok(Response::new(Box::pin(server_stream)))
     }
 
 }
